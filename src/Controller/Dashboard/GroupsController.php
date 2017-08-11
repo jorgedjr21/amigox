@@ -2,6 +2,7 @@
 namespace App\Controller\Dashboard;
 
 use App\Controller\AppController;
+use Cake\Datasource\ConnectionManager;
 use Cake\ORM\TableRegistry;
 
 /**
@@ -35,7 +36,7 @@ class GroupsController extends AppController
         $query = $this->Groups->find();
         $myGroups = $query->matching('UsersGroup',function($q){
             return $q->where(['UsersGroup.user_id'=>$this->user['id']]);
-        });
+        })->order(['role'=>'DESC']);
 
 
         $groups = $this->paginate($myGroups);
@@ -60,11 +61,11 @@ class GroupsController extends AppController
             'contain' => ['GroupEvents', 'Lottery', 'UsersGroup']
         ]);
 
+
         $usersFromGroup = $userTable->find('all')->matching('UsersGroup',function($q) use ($id) {
             return $q->where(['group_id'=>$id]);
         });
         $creator = $this->Groups->UsersGroup->find()->where(['group_id'=>$id,'role'=>2])->first();
-
         $this->paginate($usersFromGroup);
 
 
@@ -146,5 +147,26 @@ class GroupsController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+
+    public function addMember($id = null,$uid = null){
+        $id = $this->request->getParam('id');
+        $group = $this->Groups->get($id);
+
+        if($this->request->is('post')){
+            $uid = $this->request->getParam('uid');
+            $userGroupData = ['user_id'=>$uid,'group_id'=>$id,'role'=>1];
+            $userGroup = $this->Groups->UsersGroup->newEntity($userGroupData);
+            $this->Groups->UsersGroup->save($userGroup);
+            $this->Flash->success(__("Membro adicionado com sucesso!"));
+        }
+
+        $conn = ConnectionManager::get('default');
+        $stmt = $conn->query("SELECT * From Users u Where u.id NOT IN (Select ug.user_id FROM users_group ug WHERE ug.group_id = '$id')");
+        $usersNotInGroup = $stmt->fetchAll('assoc');
+
+        $this->set('user',$this->user);
+        $this->set('group',$group);
+        $this->set('usersNotInGroup',$usersNotInGroup);
     }
 }

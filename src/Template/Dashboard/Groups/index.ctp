@@ -20,6 +20,7 @@
                         <th class="text-center">#</th>
                         <th class="text-center">Nome</th>
                         <th class="text-center">Valor de gasto</th>
+                        <th class="text-center">Status</th>
                         <th class="text-center"></th>
                     </tr>
                     </thead>
@@ -29,6 +30,7 @@
                             <td width="100"><?= h($group['id']) ?></td>
                             <td><?= h($group['name']) ?></td>
                             <td><?= h($group['max_value'])?></td>
+                            <td><?= ($group->_matchingData['UsersGroup']->role == 2) ? 'Criador' : 'Membro' ?></td>
                             <td width="100"><a href="<?= $this->Url->build(['_name'=>'groups.view','id'=>$group['id']]) ?>" class="btn btn-success btn-sm">Mais Informações</a></td>
                         </tr>
 
