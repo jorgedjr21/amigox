@@ -28,7 +28,7 @@
             <?= $this->Form->end()?>
             <!-- /.social-auth-links -->
 
-            Não é membro?<a href="<?= $url ?>" class="text-center"> Registre-se agora!</a>
+            Não é membro?<a href="<?= $this->Url->build(['_name'=>'register.index'])?>" class="text-center"> Registre-se agora!</a>
 
         </div>
         <!-- /.login-box-body -->

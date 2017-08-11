@@ -116,7 +116,7 @@ class UsersController extends AppController
 
                 $this->Users->save($user);
                 $this->Flash->success(__('Cadastro realizado com sucesso!'));
-                return $this->redirect('/register');
+                return $this->redirect('/login');
             }
 
         }
