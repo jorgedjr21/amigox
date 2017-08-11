@@ -66,6 +66,9 @@ Router::scope('/', function (RouteBuilder $routes) {
     $routes->connect('/dashboard',['controller'=>'Users','action'=>'dashboard']);
 
     $routes->prefix('dashboard',function($routes){
+
+        $routes->connect('/invites/',['controller'=>'Groups','action'=>'invites'],['_name'=>'groups.invites']);
+        $routes->connect('/invites/group/:gid',['controller'=>'Groups','action'=>'handleInvites'],['_name'=>'groups.handleInvites']);
         $routes->connect('/groups/',['controller'=>'Groups','action'=>'index'],['_name'=>'groups.index']);
 
         $routes->connect('/groups/:id',['controller'=>'Groups','action'=>'view'],['_name'=>'groups.view']);
