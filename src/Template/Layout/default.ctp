@@ -323,10 +323,9 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
 
     <footer class="main-footer">
         <div class="pull-right hidden-xs">
-            <b>Version</b> 2.4.0
+            <b>Version</b> 1.0
         </div>
-        <strong>Copyright &copy; 2014-2016 <a href="https://adminlte.io">Almsaeed Studio</a>.</strong> All rights
-        reserved.
+        <strong>Amigox - Criado por =JD=. Tema e layout by<a href="https://adminlte.io">Almsaeed Studio</a>.</strong>
     </footer>
     <?= $this->Html->script(['/adminlte/plugins/jQuery/jquery3.min.js','/bootstrap/js/bootstrap.js','/adminlte/js/app.js','/adminlte/plugins/iCheck/icheck.js'])?>
     <?= $this->fetch('scripts') ?>
