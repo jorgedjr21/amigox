@@ -8,6 +8,7 @@ use Cake\ORM\Entity;
  *
  * @property int $user_id
  * @property string $group_id
+ * @property int $role
  *
  * @property \App\Model\Entity\User $user
  * @property \App\Model\Entity\Group $group

@@ -26,6 +26,7 @@ class UsersGroupFixture extends TestFixture
     public $fields = [
         'user_id' => ['type' => 'integer', 'length' => 11, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null, 'autoIncrement' => null],
         'group_id' => ['type' => 'string', 'length' => 15, 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'comment' => '', 'precision' => null, 'fixed' => null],
+        'role' => ['type' => 'integer', 'length' => 4, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null, 'autoIncrement' => null],
         '_indexes' => [
             'fk_Users_Group_Groups1_idx' => ['type' => 'index', 'columns' => ['group_id'], 'length' => []],
         ],
@@ -49,7 +50,8 @@ class UsersGroupFixture extends TestFixture
     public $records = [
         [
             'user_id' => 1,
-            'group_id' => 'c19714d5-c565-4cf1-81df-75b08654a81e'
+            'group_id' => '8be46cbe-89d5-4f17-a305-1240c41a5f26',
+            'role' => 1
         ],
     ];
 }

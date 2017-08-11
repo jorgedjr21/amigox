@@ -23,6 +23,7 @@
                             <small>Este grupo deve ter mais de 2 e um número par de membros para que o sorteio possa ser realizado!</small>
                         </p>
                     </div>
+                    <?php if($creator['user_id'] == $user['id']): ?>
                     <div class="col-md-2 col-sm-12 text-center">
                         <div class="btn-group-vertical">
                             <a href="#" class="btn btn-info btn-lg btn-block">Adicionar Membros</a>
@@ -32,6 +33,7 @@
                             <a href="#" class="btn btn-info btn-lg btn-block" disabled="">Marcar Encontro</a>
                         </div>
                     </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -46,7 +48,7 @@
                 <div class="box-body box-profile">
                     <?= $this->Html->image('profile_default.png',['alt'=>$userG['name'],'class'=>'profile-user-img img-responsive img-circle']) ?>
                     <h3 class="profile-username text-center"><?= h($userG['name']) ?></h3>
-                    <?php if($userG['id'] == $user['id']): ?>
+                    <?php if($creator['user_id'] == $user['id']): ?>
                     <p class="text-muted text-center">Criador</p>
                     <?php else: ?>
                     <p class="text-muted text-center">Membro</p>

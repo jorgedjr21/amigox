@@ -63,12 +63,14 @@ class GroupsController extends AppController
         $usersFromGroup = $userTable->find('all')->matching('UsersGroup',function($q) use ($id) {
             return $q->where(['group_id'=>$id]);
         });
+        $creator = $this->Groups->UsersGroup->find()->where(['group_id'=>$id,'role'=>2])->first();
 
         $this->paginate($usersFromGroup);
 
 
         $this->set('usersFromGroup',$usersFromGroup);
        $this->set('group', $group);
+       $this->set('creator',$creator);
        $this->set('user',$this->user);
        $this->set('_serialize', ['group']);
     }
@@ -88,7 +90,7 @@ class GroupsController extends AppController
             $group = $this->Groups->patchEntity($group, $this->request->getData());
             if ($this->Groups->save($group,['associated' => ['UsersGroup']])) {
 
-                $userGroupData = ['user_id'=>$this->user['id'],'group_id'=>$group->id];
+                $userGroupData = ['user_id'=>$this->user['id'],'group_id'=>$group->id,'role'=>2];
                 $userGroup = $this->Groups->UsersGroup->newEntity($userGroupData);
                 $this->Groups->UsersGroup->save($userGroup);
                 $this->Flash->success(__("O grupo $group[name] foi criado com sucesso "));
