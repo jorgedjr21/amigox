@@ -20,36 +20,58 @@
                         <p><strong>Valor sugerido de presente: </strong> <?php echo !empty($group['max_value']) ? $group['max_value'] : 'Sem sugestão'?></p>
                         <p><strong>Total de membros: </strong> <?= $usersFromGroup->count() ?></p>
                         <p>
-                            <small>Todo grupo deve ter pelo menos 4 membros para que o sorteio possa ser realizado</small>
+                            <small>Todo grupo deve ter pelo menos 4 membros para que o sorteio possa ser realizado. <br>A sessão de amigo secreto só pode ser marcada após o sorteio do grupo</small>
                         </p>
                     </div>
 
-                        <div class="col-md-2 col-sm-12">
+                        <div class="col-md-3 col-sm-12">
                             <div class="row">
                                 <p class="lead text-center">Seu amigo secreto:</p>
                             </div>
                             <?php
-                            if(empty($group->lottery)):
+                            if(is_null($group->lottery)):
                             ?>
                                 <div class="row">
                                     <p class="lead text-center text-aqua">Sorteio ainda não realizado</p>
                                 </div>
                                 <?php else: ?>
-                                    <div class="row">
-                                        <?= $this->Html->image('profile_default.png',['alt'=>'nome','class'=>'profile-user-img img-responsive img-circle']) ?>
-                                        <p class="text-muted text-center">Nome</p>
+                                    <div class="row text-center" >
+                                        <div class="col-md-6 col-sm-12" style="border-right: 2px dashed dodgerblue">
+                                            <?= $this->Html->image('profile_default.png',['alt'=>'nome','class'=>'profile-user-img img-responsive img-circle']) ?>
+                                            <p class="text-muted text-center"><?= h($myFriend->name)?></p>
+                                        </div>
+                                        <div class="col-md-6 col-sm-12">
+                                            <p>
+                                                <?php foreach($myFriend->preferences as $pref):?>
+                                                    <span class="label label-info"><?= h($pref) ?></span>
+                                                <?php endforeach; ?>
+                                            </p>
+                                            <p><strong>Gasto preferencial:</strong> <?= h($myFriend->max_value) ?></p>
+                                        </div>
                                     </div>
                             <?php endif; ?>
                         </div>
 
                     <?php if($creator['user_id'] == $user['id']): ?>
-                    <div class="col-md-offset-3 col-md-2 col-sm-12 text-center">
+                    <div class="col-md-offset-2 col-md-2 col-sm-12 text-center">
                         <div class="btn-group-vertical">
-                            <a href="<?= $this->Url->build(['_name'=>'groups.view.addMember','id'=>$group['id']])?>" class="btn btn-info btn-lg btn-block">Adicionar Membros</a>
-                            <?php echo ($usersFromGroup->count() >= 4 && $usersFromGroup->count() % 2 == 0) ? '<a href="#" class="btn btn-info btn-lg btn-block">Realizar Sorteio</a>' :
-                                '<a href="#" class="btn btn-info btn-lg btn-block" data-toggle="tooltip" data-placement="bottom" title="Não é possivel realizar o sorteio" disabled>Realizar Sorteio</a>' ?>
+                            <a href="<?= $this->Url->build(['_name'=>'groups.view.addMember','id'=>$group['id']])?>" class="btn btn-success btn-lg btn-block">Adicionar Membros</a>
+                            <?php
+                            if($usersFromGroup->count() >= 4 && $usersFromGroup->count() % 2 == 0 ): ?>
+                                <?php if(is_null($myFriend)): ?>
+                                    <a href="<?= $this->Url->build(["_name"=>"groups.sort","gid"=>$group["id"]]) ?>" class="btn btn-info btn-lg btn-block">Realizar Sorteio</a>
+                                <?php else: ?>
+                                    <a href="#" class="btn btn-info btn-lg btn-block" data-toggle="tooltip" data-placement="bottom" title="Sorteio já foi realizado" disabled>Sorteio Realizado</a>
+                                <?php endif;?>
+                            <?php else: ?>
+                                <a href="#" class="btn btn-info btn-lg btn-block" data-toggle="tooltip" data-placement="bottom" title="Não é possivel realizar o sorteio" disabled>Realizar Sorteio</a>
+                            <?php endif; ?>
 
-                            <a href="#" class="btn btn-info btn-lg btn-block" disabled="">Marcar Encontro</a>
+                            <?php if(is_null($myFriend)): ?>
+                                <a href="#" class="btn bg-maroon btn-lg btn-block" data-toggle="tooltip" data-placement="bottom" title="Só é possivel marcar uma sessão de amigo secreto após o sorteio do grupo" disabled="">Marcar Encontro</a>
+                            <?php else: ?>
+                                <a href="#" class="btn bg-maroon btn-lg btn-block">Marcar Encontro</a>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <?php endif; ?>

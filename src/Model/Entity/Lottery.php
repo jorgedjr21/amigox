@@ -26,8 +26,8 @@ class Lottery extends Entity
      */
     protected $_accessible = [
         '*' => true,
-        'group_id' => false,
-        'user1' => false,
-        'user2' => false
+        'group_id' => true,
+        'user1' => true,
+        'user2' => true
     ];
 }

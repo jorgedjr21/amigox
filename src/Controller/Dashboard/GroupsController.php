@@ -17,7 +17,7 @@ class GroupsController extends AppController
     private $user;
     private $invites;
     public $paginate = [
-        'limit' => 10,
+        'limit' => 12,
     ];
     public function initialize()
     {
@@ -64,10 +64,26 @@ class GroupsController extends AppController
         $id = $this->request->getParam('id');
         $userTable = TableRegistry::get('Users');
         $group = $this->Groups->get($id, [
-            'contain' => ['GroupEvents', 'Lottery', 'UsersGroup']
+            'contain' => ['GroupEvents','UsersGroup'],
         ]);
+        $myFriend = null;
 
+        $group->lottery = $this->Groups->Lottery->
+            find('all')
+            ->where(['group_id'=>$id,'user1'=>$this->user['id']])
+            ->orWhere(['group_id'=>$id,'user2'=>$this->user['id']])
+            ->first();
 
+        if(!is_null($group->lottery)){
+
+            if($group->lottery->user1 == $this->user['id'])
+                $myFriend = $this->Groups->UsersGroup->Users->get($group->lottery->user2);
+            else
+                $myFriend = $this->Groups->UsersGroup->Users->get($group->lottery->user1);
+            $myFriend->preferences = explode(',',$myFriend->preferences);
+        }
+
+        //dd($group->lottery);
         $usersFromGroup = $userTable->find('all')->matching('UsersGroup',function($q) use ($id) {
             return $q->where(['group_id'=>$id,'invite_status'=>1]);
         });
@@ -78,6 +94,7 @@ class GroupsController extends AppController
         $this->set('usersFromGroup',$usersFromGroup);
         $this->set('invites',$this->invites);
        $this->set('group', $group);
+       $this->set('myFriend',$myFriend);
        $this->set('creator',$creator);
        $this->set('user',$this->user);
        $this->set('_serialize', ['group']);
@@ -210,5 +227,43 @@ class GroupsController extends AppController
             default:
                 return $this->redirect('/dashboard/invites');
         }
+    }
+
+    public function sort($gid = null){
+        $gid = $this->request->getParam('gid');
+
+        $usersFromGroup = $this->Groups->UsersGroup->find('all')->where(['group_id'=>$gid]);
+        $users = [];
+
+        foreach($usersFromGroup as $ufg){
+            $users[] = $ufg['user_id'];
+        }
+        //Embaralha o array de ids de usuários;
+        shuffle($users);
+        //Separa em duas partes
+        $arrHelper = array_chunk($users,count($users)/2);
+
+        //Atribui a users1 primeira metade
+        $users1 = $arrHelper[0];
+        //Atribuiu a users2 a segunda metade
+        $users2 = $arrHelper[1];
+
+        $lottery = [];
+        for ($i = 0; $i < count($users1) ; $i++){
+            $lottery[$i]['group_id'] = $gid;
+            $lottery[$i]['user1'] = $users1[$i];
+            $lottery[$i]['user2'] = $users2[$i];
+        }
+
+        $lotteryTable = TableRegistry::get('Lottery');
+        $lottery = $lotteryTable->newEntities($lottery);
+        $result = $lotteryTable->saveMany($lottery);
+        if($result){
+            $this->Flash->success(__('Sorteio realizado com sucesso!'));
+        }else{
+            dd($result);
+        }
+
+        return $this->redirect(['_name'=>'groups.view','id'=>$gid]);
     }
 }

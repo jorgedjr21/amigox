@@ -72,6 +72,9 @@ Router::scope('/', function (RouteBuilder $routes) {
         $routes->connect('/groups/',['controller'=>'Groups','action'=>'index'],['_name'=>'groups.index']);
 
         $routes->connect('/groups/:id',['controller'=>'Groups','action'=>'view'],['_name'=>'groups.view']);
+
+        $routes->connect('/groups/:gid/sort',['controller'=>'Groups','action'=>'sort'],['_name'=>'groups.sort']);
+
         $routes->connect('/groups/:id/addMember',['controller'=>'Groups','action'=>'addMember'],['_name'=>'groups.view.addMember']);
         $routes->connect('/groups/:id/addMember/:uid',['controller'=>'Groups','action'=>'addMember'],['_name'=>'groups.addMember']);
 
