@@ -27,8 +27,10 @@ class LotteryTableTest extends TestCase
         'app.lottery',
         'app.groups',
         'app.group_events',
-        'app.users_group',
-        'app.users'
+        'app.event',
+        'app.events_notifications',
+        'app.users',
+        'app.users_group'
     ];
 
     /**

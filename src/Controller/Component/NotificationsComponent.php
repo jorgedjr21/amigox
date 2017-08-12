@@ -26,4 +26,25 @@ class NotificationsComponent extends Component
 
         return $notifications;
     }
+
+    public function saveEventsNotifications($data){
+
+        $eventTable = TableRegistry::get('Event');
+        $eventsNotif = $eventTable->EventsNotifications->newEntities($data);
+        $eventTable->EventsNotifications->saveMany($eventsNotif);
+
+        return true;
+    }
+
+    public function getSortNotificationsFromUser($uid){
+        $eventNotificationTable = TableRegistry::get('EventsNotifications');
+
+        $notifications = $eventNotificationTable
+            ->find()
+            ->where(['user_id'=>$uid,'status'=>10])
+            ->contain(['Event'])
+            ->limit(10);
+
+        return $notifications;
+    }
 }

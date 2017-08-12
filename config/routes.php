@@ -75,7 +75,7 @@ Router::scope('/', function (RouteBuilder $routes) {
 
 
 
-        $routes->connect('/groups/:id/sort',['controller'=>'Groups','action'=>'sort'],['_name'=>'groups.sort']);
+        $routes->connect('/groups/:id/event/:eid/sort',['controller'=>'Groups','action'=>'sort'],['_name'=>'groups.sort']);
 
         $routes->connect('/groups/:id/events/new',['controller'=>'Groups','action'=>'newEvent'],['_name'=>'groups.events.new']);
 
@@ -84,7 +84,7 @@ Router::scope('/', function (RouteBuilder $routes) {
 
         $routes->connect('/groups/add',['controller'=>'Groups','action'=>'add'],['_name'=>'groups.add.form']);
 
-        $routes->connect('/events/groups/:eid',['controller'=>'Groups','action'=>'viewEvent'],['_name'=>'groups.viewEvent']);
+        $routes->connect('/groups/events/:eid',['controller'=>'Groups','action'=>'viewEvent'],['_name'=>'groups.viewEvent']);
 
         $routes->fallbacks(DashedRoute::class);
     });

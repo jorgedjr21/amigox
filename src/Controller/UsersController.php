@@ -17,6 +17,7 @@ class UsersController extends AppController
     private $user;
     private $invites;
     private $eventNotifications;
+    private $sortNotifications;
 
     public function initialize()
     {
@@ -47,6 +48,7 @@ class UsersController extends AppController
         $query = TableRegistry::get('Users');
         $this->invites = $this->Invites->getUserGroupsInvites($this->user['id']);
         $this->eventNotifications = $this->Notifications->getEventsNotificationsFromUser($this->user['id']);
+        $this->sortNotifications = $this->Notifications->getSortNotificationsFromUser($this->user['id']);
 
         $myGroyps = $query->find('all')->where(['id'=>$this->user['id']])->matching('UsersGroup',function($q){
             return $q->where(['UsersGroup.user_id'=>$this->user['id'],'UsersGroup.invite_status'=>1]);
@@ -54,6 +56,7 @@ class UsersController extends AppController
 
         $this->set('invites',$this->invites);
         $this->set('eventNotifications',$this->eventNotifications);
+        $this->set('sortNotifications',$this->sortNotifications);
         $this->set('user',$this->Auth->user());
         $this->set('myGroups',$myGroyps);
     }

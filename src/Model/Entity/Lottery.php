@@ -7,6 +7,7 @@ use Cake\ORM\Entity;
  * Lottery Entity
  *
  * @property string $group_id
+ * @property string $event_id
  * @property int $user1
  * @property int $user2
  *

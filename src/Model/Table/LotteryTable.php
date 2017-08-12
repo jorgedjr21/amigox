@@ -10,6 +10,7 @@ use Cake\Validation\Validator;
  * Lottery Model
  *
  * @property \App\Model\Table\GroupsTable|\Cake\ORM\Association\BelongsTo $Groups
+ * @property |\Cake\ORM\Association\BelongsTo $Event
  *
  * @method \App\Model\Entity\Lottery get($primaryKey, $options = [])
  * @method \App\Model\Entity\Lottery newEntity($data = null, array $options = [])
@@ -38,6 +39,10 @@ class LotteryTable extends Table
 
         $this->belongsTo('Groups', [
             'foreignKey' => 'group_id',
+            'joinType' => 'INNER'
+        ]);
+        $this->belongsTo('Event', [
+            'foreignKey' => 'event_id',
             'joinType' => 'INNER'
         ]);
     }
@@ -71,6 +76,7 @@ class LotteryTable extends Table
     public function buildRules(RulesChecker $rules)
     {
         $rules->add($rules->existsIn(['group_id'], 'Groups'));
+        $rules->add($rules->existsIn(['event_id'], 'Event'));
 
         return $rules;
     }

@@ -190,6 +190,41 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
                                 </ul>
                             </li>
                         </ul>
+                        <li class="dropdown messages-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-gift fa-lg"></i>
+                                <?php if($sortNotifications->count() > 0 && $sortNotifications->count() < 10): ?>
+                                    <span class="label label-danger"><?= $sortNotifications->count() ?></span>
+                                <?php endif; ?>
+                                <?php if($sortNotifications->count() >= 10): ?>
+                                    <span class="label label-danger">9+</span>
+                                <?php endif; ?>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="header"><?= $sortNotifications->count() ?> Amigo(s) secreto(s) sorteado(s)</li>
+                                <li>
+                                    <!-- inner menu: contains the actual data -->
+                                    <ul class="menu">
+                                        <?php if($sortNotifications->count() > 0 ): ?>
+                                            <ul class="menu">
+                                                <?php foreach($sortNotifications as $notification): ?>
+                                                    <li>
+                                                        <a href="<?= $this->Url->build(['_name'=>'groups.viewEvent','eid'=>$notification->event_id]) ?>">
+                                                            <i class="fa fa-clock-o text-muted"></i> <?= $notification->event->name ?> foi sorteado
+                                                        </a>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        <?php else: ?>
+                                            <ul class="menu">
+                                                <li><a href="#" class="text-red"><i class="fa fa-times"></i> Nenhum Evento</a></li>
+                                            </ul>
+                                        <?php endif; ?>
+                                    </ul>
+                                </li>
+                                <li class="footer"><a href="#">See All Messages</a></li>
+                            </ul>
+                        </li>
                     </li>
                     <!-- User Account: style can be found in dropdown.less -->
                     <li class="dropdown user user-menu">

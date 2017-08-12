@@ -18,6 +18,7 @@ class GroupsController extends AppController
     private $user;
     private $invites;
     private $eventNotifications;
+    private $sortNotifications;
     public $paginate = [
         'limit' => 12,
     ];
@@ -31,6 +32,7 @@ class GroupsController extends AppController
         $this->loadComponent('Notifications');
         $this->invites = $this->Invites->getUserGroupsInvites($this->user['id']);
         $this->eventNotifications = $this->Notifications->getEventsNotificationsFromUser($this->user['id']);
+        $this->sortNotifications = $this->Notifications->getSortNotificationsFromUser($this->user['id']);
 
     }
 
@@ -54,6 +56,7 @@ class GroupsController extends AppController
         $this->set('user',$this->user);
         $this->set('invites',$this->invites);
         $this->set('eventNotifications',$this->eventNotifications);
+        $this->set('sortNotifications',$this->sortNotifications);
         $this->set('_serialize', ['groups']);
     }
 
@@ -73,22 +76,11 @@ class GroupsController extends AppController
         ]);
         $myFriend = null;
 
-        $group->lottery = $this->Groups->Lottery->
-            find('all')
-            ->where(['group_id'=>$id,'user1'=>$this->user['id']])
-            ->orWhere(['group_id'=>$id,'user2'=>$this->user['id']])
-            ->first();
+        $groupEvents = $this->Groups->GroupEvents->find()->where(['group_id'=>$id])->matching('Event',function($q){
+            return $q->where(['datetime >'=>Time::now('America/Sao_Paulo')]);
+        })->order(['datetime'=>'ASC'])->limit(3);
 
-        if(!is_null($group->lottery)){
 
-            if($group->lottery->user1 == $this->user['id'])
-                $myFriend = $this->Groups->UsersGroup->Users->get($group->lottery->user2);
-            else
-                $myFriend = $this->Groups->UsersGroup->Users->get($group->lottery->user1);
-            $myFriend->preferences = explode(',',$myFriend->preferences);
-        }
-
-        //dd($group->lottery);
         $usersFromGroup = $userTable->find('all')->matching('UsersGroup',function($q) use ($id) {
             return $q->where(['group_id'=>$id,'invite_status'=>1]);
         });
@@ -99,8 +91,9 @@ class GroupsController extends AppController
         $this->set('usersFromGroup',$usersFromGroup);
         $this->set('invites',$this->invites);
         $this->set('eventNotifications',$this->eventNotifications);
+        $this->set('sortNotifications',$this->sortNotifications);
        $this->set('group', $group);
-       $this->set('myFriend',$myFriend);
+       $this->set('groupEvents',$groupEvents);
        $this->set('creator',$creator);
        $this->set('user',$this->user);
        $this->set('_serialize', ['group']);
@@ -133,6 +126,7 @@ class GroupsController extends AppController
         $this->set(compact('group','id'));
         $this->set('invites',$this->invites);
         $this->set('eventNotifications',$this->eventNotifications);
+        $this->set('sortNotifications',$this->sortNotifications);
         $this->set('_serialize', ['group']);
     }
 
@@ -160,6 +154,7 @@ class GroupsController extends AppController
         $this->set(compact('group'));
         $this->set('invites',$this->invites);
         $this->set('eventNotifications',$this->eventNotifications);
+        $this->set('sortNotifications',$this->sortNotifications);
         $this->set('_serialize', ['group']);
     }
 
@@ -210,6 +205,7 @@ class GroupsController extends AppController
         $this->set('invites',$this->invites);
         $this->set('group',$group);
         $this->set('eventNotifications',$this->eventNotifications);
+        $this->set('sortNotifications',$this->sortNotifications);
         $this->set('usersNotInGroup',$usersNotInGroup);
     }
 
@@ -251,45 +247,61 @@ class GroupsController extends AppController
     }
 
     /**
-     * @param null $id
+     * @param null|string $id group ID
+     * @param null|string $eid event ID
      * @return \Cake\Http\Response|null
      */
-    public function sort($id = null){
+    public function sort($id = null,$eid=null){
         $gid = $this->request->getParam('id');
+        $eid = $this->request->getParam('eid');
 
-        $usersFromGroup = $this->Groups->UsersGroup->find('all')->where(['group_id'=>$gid]);
-        $users = [];
+        if($this->request->is('post')){
+            $usersFromGroup = $this->Groups->UsersGroup->find('all')->where(['group_id'=>$gid]);
+            $users = [];
 
-        foreach($usersFromGroup as $ufg){
-            $users[] = $ufg['user_id'];
+            foreach($usersFromGroup as $ufg){
+                $users[] = $ufg['user_id'];
+            }
+            //Embaralha o array de ids de usuários;
+            shuffle($users);
+            //Separa em duas partes
+            $arrHelper = array_chunk($users,count($users)/2);
+
+            //Atribui a users1 primeira metade
+            $users1 = $arrHelper[0];
+            //Atribuiu a users2 a segunda metade
+            $users2 = $arrHelper[1];
+
+            $lottery = [];
+            for ($i = 0; $i < count($users1) ; $i++){
+                $lottery[$i]['group_id'] = $gid;
+                $lottery[$i]['event_id'] = $eid;
+                $lottery[$i]['user1'] = $users1[$i];
+                $lottery[$i]['user2'] = $users2[$i];
+            }
+
+            $lotteryTable = TableRegistry::get('Lottery');
+            $lottery = $lotteryTable->newEntities($lottery);
+            $result = $lotteryTable->saveMany($lottery);
+
+            $notif = [];
+            /* Cria array de notificações para todos os usuários*/
+            foreach ($usersFromGroup as $ug){
+                $notif[] = ['user_id'=>$ug['user_id'],'event_id'=>$eid,'status'=>10];
+            }
+
+            /* Cria entidades das notificações e salva*/
+            $this->Notifications->saveEventsNotifications($notif);
+
+            if($result){
+                $this->Flash->success(__('Sorteio realizado com sucesso!'));
+            }else{
+                $this->Flash->error(__('Não foi possivel realizar o sorteio, tente novamente'));
+            }
+
+            return $this->redirect(['_name'=>'groups.viewEvent','eid'=>$eid]);
         }
-        //Embaralha o array de ids de usuários;
-        shuffle($users);
-        //Separa em duas partes
-        $arrHelper = array_chunk($users,count($users)/2);
-
-        //Atribui a users1 primeira metade
-        $users1 = $arrHelper[0];
-        //Atribuiu a users2 a segunda metade
-        $users2 = $arrHelper[1];
-
-        $lottery = [];
-        for ($i = 0; $i < count($users1) ; $i++){
-            $lottery[$i]['group_id'] = $gid;
-            $lottery[$i]['user1'] = $users1[$i];
-            $lottery[$i]['user2'] = $users2[$i];
-        }
-
-        $lotteryTable = TableRegistry::get('Lottery');
-        $lottery = $lotteryTable->newEntities($lottery);
-        $result = $lotteryTable->saveMany($lottery);
-        if($result){
-            $this->Flash->success(__('Sorteio realizado com sucesso!'));
-        }else{
-            dd($result);
-        }
-
-        return $this->redirect(['_name'=>'groups.view','id'=>$gid]);
+        return $this->redirect(['_name'=>'groups.viewEvent','eid'=>$eid]);
     }
 
 
@@ -321,15 +333,14 @@ class GroupsController extends AppController
                 $notif = [];
                 /* Cria array de notificações para todos os usuários*/
                 foreach ($usersGroup as $ug){
-                    $notif[] = ['users_id'=>$ug['user_id'],'event_id'=>$event->id,'status'=>0];
+                    $notif[] = ['user_id'=>$ug['user_id'],'event_id'=>$event->id,'status'=>0];
                 }
 
                 /* Cria entidades das notificações e salva*/
-                $eventsNotif = $eventTable->EventsNotifications->newEntities($notif);
-                $eventTable->EventsNotifications->saveMany($eventsNotif);
+                $this->Notifications->saveEventsNotifications($notif);
 
                 $this->Flash->success(__('Evento '.$event->name.' criado com sucesso'));
-                return $this->redirect(['_name' => 'groups.events.new','id'=>$id]);
+                return $this->redirect(['_name' => 'groups.view','id'=>$id]);
             }
             $this->Flash->error(__('Não foi possivel criar o grupo pois erros ocorreram:'),['params'=>['errors'=>$event->getErrors()]]);
 
@@ -339,35 +350,68 @@ class GroupsController extends AppController
         $this->set('user',$this->user);
         $this->set('invites',$this->invites);
         $this->set('eventNotifications',$this->eventNotifications);
-
+        $this->set('sortNotifications',$this->sortNotifications);
 
     }
 
     public function viewEvent($eid = null){
         $eid = $this->request->getParam('eid');
         $eventTable = TableRegistry::get('Event');
+        $groupEventsTable = TableRegistry::get('GroupEvents');
+        $usersGroupTable = TableRegistry::get('UsersGroup');
+        $lotteryTable = TableRegistry::get('Lottery');
         $eventsNotificationTable = TableRegistry::get('EventsNotifications');
 
+        $groupEvents = $groupEventsTable->find()->where(['event_id'=>$eid])->first();
+
+
+        $lottery = $lotteryTable->find()
+            ->where(['group_id'=>$groupEvents->group_id,'event_id'=>$eid,'user1'=>$this->user['id']])
+            ->orWhere(['group_id'=>$groupEvents->group_id,'event_id'=>$eid,'user2'=>$this->user['id']])
+            ->first();
+        $creator = $usersGroupTable->find()
+            ->where(['group_id'=>$groupEvents->group_id,'user_id'=>$this->user['id'],'role'=>2])
+            ->first();
+
+
+        $myFriend = null;
+
+
+        if(!is_null($lottery)){
+            $userTable = TableRegistry::get('Users');
+            if($lottery->user1 == $this->user['id'])
+                $myFriend = $userTable->get($lottery->user2);
+            else
+                $myFriend = $userTable->get($lottery->user1);
+            $myFriend['preferences'] = explode(',',$myFriend['preferences']);
+        }
         $query = $eventTable->find('all')
             ->where(['id'=>$eid,'datetime >'=>Time::now('America/Sao_Paulo')])
             ->matching('GroupEvents',function($q) use($eid){
                 return $q->where(['event_id'=>$eid]);
             });
 
+
         /** atualiza notificação para vista (status 1) */
-        /*$notification = $eventsNotificationTable->find()
+        $notification = $eventsNotificationTable->find()
             ->where(['user_id'=>$this->user['id'],'event_id'=>$eid,'status'=>0])
+            ->orWhere(['user_id'=>$this->user['id'],'event_id'=>$eid,'status'=>10])
             ->first();
-        $notification->status = 1;
-        $eventsNotificationTable->save($notification);*/
+        if(!is_null($notification)){
+           $notification->status = 1;
+           $eventsNotificationTable->save($notification);
+        }
 
         $event = $query->first();
 
         $this->set('user',$this->user);
-        $this->set('invites',$this->invites);
+        $this->set('creator',$creator);
+        $this->set('myFriend',$myFriend);
+        $this->set('lottery',$lottery);
         $this->set('event',$event);
+        $this->set('invites',$this->invites);
         $this->set('eventNotifications',$this->eventNotifications);
-
+        $this->set('sortNotifications',$this->sortNotifications);
 
     }
 }
