@@ -68,8 +68,8 @@
 
 </section>
 <?= $this->start('scripts') ?>
+
 <script>
-    //alert('aaa');
     $(document).ready(function(){
         var textArea = $("#description");
         var helpLength = $("#charleft");

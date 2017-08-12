@@ -3,6 +3,7 @@ namespace App\Controller\Dashboard;
 
 use App\Controller\AppController;
 use Cake\Datasource\ConnectionManager;
+use Cake\I18n\Time;
 use Cake\ORM\TableRegistry;
 
 /**
@@ -16,6 +17,7 @@ class GroupsController extends AppController
 {
     private $user;
     private $invites;
+    private $eventNotifications;
     public $paginate = [
         'limit' => 12,
     ];
@@ -26,7 +28,9 @@ class GroupsController extends AppController
         $this->loadComponent('Paginator');
         $this->loadComponent('Invites');
 
+        $this->loadComponent('Notifications');
         $this->invites = $this->Invites->getUserGroupsInvites($this->user['id']);
+        $this->eventNotifications = $this->Notifications->getEventsNotificationsFromUser($this->user['id']);
 
     }
 
@@ -49,6 +53,7 @@ class GroupsController extends AppController
         $this->set(compact('groups','myGroups'));
         $this->set('user',$this->user);
         $this->set('invites',$this->invites);
+        $this->set('eventNotifications',$this->eventNotifications);
         $this->set('_serialize', ['groups']);
     }
 
@@ -93,6 +98,7 @@ class GroupsController extends AppController
 
         $this->set('usersFromGroup',$usersFromGroup);
         $this->set('invites',$this->invites);
+        $this->set('eventNotifications',$this->eventNotifications);
        $this->set('group', $group);
        $this->set('myFriend',$myFriend);
        $this->set('creator',$creator);
@@ -126,6 +132,7 @@ class GroupsController extends AppController
         }
         $this->set(compact('group','id'));
         $this->set('invites',$this->invites);
+        $this->set('eventNotifications',$this->eventNotifications);
         $this->set('_serialize', ['group']);
     }
 
@@ -152,6 +159,7 @@ class GroupsController extends AppController
         }
         $this->set(compact('group'));
         $this->set('invites',$this->invites);
+        $this->set('eventNotifications',$this->eventNotifications);
         $this->set('_serialize', ['group']);
     }
 
@@ -175,6 +183,11 @@ class GroupsController extends AppController
         return $this->redirect(['action' => 'index']);
     }
 
+    /**
+     * Save new member to group
+     * @param int|null $id
+     * @param int|null $uid
+     */
     public function addMember($id = null,$uid = null){
         $id = $this->request->getParam('id');
         $group = $this->Groups->get($id);
@@ -196,15 +209,23 @@ class GroupsController extends AppController
         $this->set('user',$this->user);
         $this->set('invites',$this->invites);
         $this->set('group',$group);
+        $this->set('eventNotifications',$this->eventNotifications);
         $this->set('usersNotInGroup',$usersNotInGroup);
     }
 
+    /*
+     * Invite view method
+     */
     public function invites(){
 
         $this->set('invites',$this->invites);
+        $this->set('eventNotifications',$this->eventNotifications);
         $this->set('user',$this->user);
     }
 
+    /*
+     * handle the invites
+     */
     public function handleInvites($gid = null){
         $type = $this->request->getParam('?')['type'];
         $gid = $this->request->getParam('gid');
@@ -229,8 +250,12 @@ class GroupsController extends AppController
         }
     }
 
-    public function sort($gid = null){
-        $gid = $this->request->getParam('gid');
+    /**
+     * @param null $id
+     * @return \Cake\Http\Response|null
+     */
+    public function sort($id = null){
+        $gid = $this->request->getParam('id');
 
         $usersFromGroup = $this->Groups->UsersGroup->find('all')->where(['group_id'=>$gid]);
         $users = [];
@@ -265,5 +290,84 @@ class GroupsController extends AppController
         }
 
         return $this->redirect(['_name'=>'groups.view','id'=>$gid]);
+    }
+
+
+    public function newEvent($id = null){
+        $id = $this->request->getParam('id');
+        $group = $this->Groups->get($id);
+
+        if($this->request->is('post')){
+            $data = $this->request->getData();
+            if(empty($data['time']) || empty($data['date'])){
+                $this->Flash->error(__('Atenção, a data e horário do evento não podem ficar em branco'));
+                return $this->redirect(['_name' => 'groups.events.new','id'=>$id]);
+            }
+            $data['datetime'] = $this->request->getData(['date']).' '.$this->request->getData('time');
+            unset($data['time'],$data['date']);
+            $data['datetime'] = Time::createFromFormat('d/m/Y H:i',$data['datetime'],'America/Sao_Paulo');
+
+            $eventTable = TableRegistry::get('Event');
+            $event = $eventTable->newEntity($data);
+
+            if($eventTable->save($event)){
+                //cria Relação entre evento e Grupo
+                $groupEvent = ['group_id'=>$id,'event_id'=>$event->id];
+                $groupEventEntity = $this->Groups->GroupEvents->newEntity($groupEvent);
+                $this->Groups->GroupEvents->save($groupEventEntity);
+
+                /* Recupera usuarios do grupo*/
+                $usersGroup = $this->Groups->UsersGroup->find()->where(['group_id'=>$id]);
+                $notif = [];
+                /* Cria array de notificações para todos os usuários*/
+                foreach ($usersGroup as $ug){
+                    $notif[] = ['users_id'=>$ug['user_id'],'event_id'=>$event->id,'status'=>0];
+                }
+
+                /* Cria entidades das notificações e salva*/
+                $eventsNotif = $eventTable->EventsNotifications->newEntities($notif);
+                $eventTable->EventsNotifications->saveMany($eventsNotif);
+
+                $this->Flash->success(__('Evento '.$event->name.' criado com sucesso'));
+                return $this->redirect(['_name' => 'groups.events.new','id'=>$id]);
+            }
+            $this->Flash->error(__('Não foi possivel criar o grupo pois erros ocorreram:'),['params'=>['errors'=>$event->getErrors()]]);
+
+        }
+
+        $this->set('group',$group);
+        $this->set('user',$this->user);
+        $this->set('invites',$this->invites);
+        $this->set('eventNotifications',$this->eventNotifications);
+
+
+    }
+
+    public function viewEvent($eid = null){
+        $eid = $this->request->getParam('eid');
+        $eventTable = TableRegistry::get('Event');
+        $eventsNotificationTable = TableRegistry::get('EventsNotifications');
+
+        $query = $eventTable->find('all')
+            ->where(['id'=>$eid,'datetime >'=>Time::now('America/Sao_Paulo')])
+            ->matching('GroupEvents',function($q) use($eid){
+                return $q->where(['event_id'=>$eid]);
+            });
+
+        /** atualiza notificação para vista (status 1) */
+        /*$notification = $eventsNotificationTable->find()
+            ->where(['user_id'=>$this->user['id'],'event_id'=>$eid,'status'=>0])
+            ->first();
+        $notification->status = 1;
+        $eventsNotificationTable->save($notification);*/
+
+        $event = $query->first();
+
+        $this->set('user',$this->user);
+        $this->set('invites',$this->invites);
+        $this->set('event',$event);
+        $this->set('eventNotifications',$this->eventNotifications);
+
+
     }
 }

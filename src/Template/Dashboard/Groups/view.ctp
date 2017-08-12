@@ -59,7 +59,7 @@
                             <?php
                             if($usersFromGroup->count() >= 4 && $usersFromGroup->count() % 2 == 0 ): ?>
                                 <?php if(is_null($myFriend)): ?>
-                                    <a href="<?= $this->Url->build(["_name"=>"groups.sort","gid"=>$group["id"]]) ?>" class="btn btn-info btn-lg btn-block">Realizar Sorteio</a>
+                                    <a href="<?= $this->Url->build(["_name"=>"groups.sort","id"=>$group["id"]]) ?>" class="btn btn-info btn-lg btn-block">Realizar Sorteio</a>
                                 <?php else: ?>
                                     <a href="#" class="btn btn-info btn-lg btn-block" data-toggle="tooltip" data-placement="bottom" title="Sorteio já foi realizado" disabled>Sorteio Realizado</a>
                                 <?php endif;?>
@@ -70,7 +70,7 @@
                             <?php if(is_null($myFriend)): ?>
                                 <a href="#" class="btn bg-maroon btn-lg btn-block" data-toggle="tooltip" data-placement="bottom" title="Só é possivel marcar uma sessão de amigo secreto após o sorteio do grupo" disabled="">Marcar Encontro</a>
                             <?php else: ?>
-                                <a href="#" class="btn bg-maroon btn-lg btn-block">Marcar Encontro</a>
+                                <a href="<?= $this->Url->build(['_name'=>'groups.events.new','id'=>$group['id']])?>" class="btn bg-maroon btn-lg btn-block">Marcar Encontro</a>
                             <?php endif; ?>
                         </div>
                     </div>

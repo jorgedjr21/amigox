@@ -73,12 +73,18 @@ Router::scope('/', function (RouteBuilder $routes) {
 
         $routes->connect('/groups/:id',['controller'=>'Groups','action'=>'view'],['_name'=>'groups.view']);
 
-        $routes->connect('/groups/:gid/sort',['controller'=>'Groups','action'=>'sort'],['_name'=>'groups.sort']);
+
+
+        $routes->connect('/groups/:id/sort',['controller'=>'Groups','action'=>'sort'],['_name'=>'groups.sort']);
+
+        $routes->connect('/groups/:id/events/new',['controller'=>'Groups','action'=>'newEvent'],['_name'=>'groups.events.new']);
 
         $routes->connect('/groups/:id/addMember',['controller'=>'Groups','action'=>'addMember'],['_name'=>'groups.view.addMember']);
         $routes->connect('/groups/:id/addMember/:uid',['controller'=>'Groups','action'=>'addMember'],['_name'=>'groups.addMember']);
 
         $routes->connect('/groups/add',['controller'=>'Groups','action'=>'add'],['_name'=>'groups.add.form']);
+
+        $routes->connect('/events/groups/:eid',['controller'=>'Groups','action'=>'viewEvent'],['_name'=>'groups.viewEvent']);
 
         $routes->fallbacks(DashedRoute::class);
     });
