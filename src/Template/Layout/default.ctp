@@ -238,16 +238,16 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
                 </div>
             </div>
             <!-- search form -->
-            <form action="#" method="get" class="sidebar-form">
+            <div class="sidebar-form">
                 <div class="input-group">
-                    <input type="text" name="q" class="form-control" placeholder="Procurar Presentes...">
+                    <input type="text" name="q" id="q" class="form-control" placeholder="Buscar Presentes...">
                     <span class="input-group-btn">
-                <button type="submit" name="search" id="search-btn" class="btn btn-flat">
-                  <i class="fa fa-search"></i>
-                </button>
-              </span>
+                        <button type="button" name="search" id="btnsearch" class="btn btn-flat">
+                          <i class="fa fa-search"></i>
+                        </button>
+                    </span>
                 </div>
-            </form>
+            </div>
             <!-- /.search form -->
             <!-- sidebar menu: : style can be found in sidebar.less -->
             <ul class="sidebar-menu" data-widget="tree">
@@ -264,11 +264,6 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
                         <li><a href="<?= $this->Url->build(['_name'=>'groups.add.form']) ?>"><i class="fa fa-plus-circle"></i> Criar novo</a></li>
                     </ul>
                 </li>
-                <li><a href="https://adminlte.io/docs"><i class="fa fa-book"></i> </a></li>
-                <li class="header">LABELS</li>
-                <li><a href="#"><i class="fa fa-circle-o text-red"></i> <span>Important</span></a></li>
-                <li><a href="#"><i class="fa fa-circle-o text-yellow"></i> <span>Warning</span></a></li>
-                <li><a href="#"><i class="fa fa-circle-o text-aqua"></i> <span>Information</span></a></li>
             </ul>
         </section>
         <!-- /.sidebar -->
@@ -287,6 +282,19 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
         <strong>Amigox - Criado por =JD=. Tema e layout by<a href="https://adminlte.io">Almsaeed Studio</a>.</strong>
     </footer>
     <?= $this->Html->script(['/adminlte/plugins/jQuery/jquery3.min.js','/bootstrap/js/bootstrap.js','/adminlte/js/app.js','/adminlte/plugins/iCheck/icheck.js'])?>
+    <script>
+        $(document).ready(function(){
+            var btnSearch = $("#btnsearch");
+            var searchUrl = "http://www.buscape.com.br/cprocura?produto=";
+            var q = $("#q");
+
+            btnSearch.click(function(){
+
+                window.open(searchUrl+q.val(),'_blank');
+                q.val('');
+            })
+        })
+    </script>
     <?= $this->fetch('scripts') ?>
 </body>
 </html>

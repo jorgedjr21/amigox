@@ -84,7 +84,7 @@ class GroupsController extends AppController
         if(is_null($groupCheck)){
             $this->set('canSee',false);
         }else{
-            $messages = $this->Groups->Messages->find()->where(['group_id'=>$id])->orderDesc('datetime')->contain(['Users']);
+            $messages = $this->Groups->Messages->find()->where(['group_id'=>$id])->orderDesc('Messages.id')->contain(['Users']);
             $group = $this->Groups->get($id);
 
             $groupEvents = $this->Groups->GroupEvents->find()->where(['group_id'=>$id])->matching('Event',function($q){
@@ -245,6 +245,8 @@ class GroupsController extends AppController
 
         $this->set('invites',$this->invites);
         $this->set('eventNotifications',$this->eventNotifications);
+        $this->set('sortNotifications',$this->sortNotifications);
+        $this->set('messageNotifications',$this->messageNotifications);
         $this->set('user',$this->user);
     }
 
