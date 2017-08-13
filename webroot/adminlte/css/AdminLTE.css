@@ -3331,6 +3331,7 @@ table.text-center th {
  * -------------
  */
 .profile-user-img {
+  min-height: 100px;
   margin: 0 auto;
   width: 100px;
   padding: 3px;
@@ -4832,6 +4833,14 @@ table.text-center th {
 .img-lg + .img-push {
   margin-left: 110px;
 }
+.img-xlg {
+  width: 200px;
+  height: 200px;
+}
+.img-xlg + .img-push {
+  margin-left: 220px;
+}
+
 .img-bordered {
   border: 3px solid #d2d6de;
   padding: 3px;

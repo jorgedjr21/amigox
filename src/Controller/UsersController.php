@@ -51,6 +51,7 @@ class UsersController extends AppController
         $this->eventNotifications = $this->Notifications->getEventsNotificationsFromUser($this->user['id']);
         $this->sortNotifications = $this->Notifications->getSortNotificationsFromUser($this->user['id']);
         $this->messageNotifications = $this->Notifications->getMessageNotificationsFromUser($this->user['id']);
+        $this->user['img_profile'] = (is_null($this->user['img_profile'])) ? 'profile_default.png' : 'profiles/'.$this->user['id'].'/'.$this->user['img_profile'];
 
         $myGroyps = $query->find('all')->where(['id'=>$this->user['id']])->matching('UsersGroup',function($q){
             return $q->where(['UsersGroup.user_id'=>$this->user['id'],'UsersGroup.invite_status'=>1]);
@@ -116,48 +117,54 @@ class UsersController extends AppController
         }
     }
 
-    /**
-     * Edit method
-     *
-     * @param string|null $id User id.
-     * @return \Cake\Http\Response|null Redirects on successful edit, renders view otherwise.
-     * @throws \Cake\Network\Exception\NotFoundException When record not found.
-     */
-    public function edit($id = null)
-    {
-        $user = $this->Users->get($id, [
-            'contain' => []
-        ]);
-        if ($this->request->is(['patch', 'post', 'put'])) {
-            $user = $this->Users->patchEntity($user, $this->request->getData());
-            if ($this->Users->save($user)) {
-                $this->Flash->success(__('The user has been saved.'));
+    public function profile(){
+        $this->user = $this->Auth->user();
+        $this->invites = $this->Invites->getUserGroupsInvites($this->user['id']);
+        $this->eventNotifications = $this->Notifications->getEventsNotificationsFromUser($this->user['id']);
+        $this->sortNotifications = $this->Notifications->getSortNotificationsFromUser($this->user['id']);
+        $this->messageNotifications = $this->Notifications->getMessageNotificationsFromUser($this->user['id']);
 
-                return $this->redirect(['action' => 'index']);
+
+        $usr = $this->Users->get($this->user['id']);
+        $usr->preferences = explode(',',$usr->preferences);
+
+
+
+        if($this->request->is('post')){
+            $imgTypes = ['image/jpeg','image/jpg'];
+            $file = $this->request->getData('img');
+            if(in_array($file['type'],$imgTypes)){
+                $size = $file['size']/pow(1024,2);
+                if($size < (5*pow(1024,2))){
+                    $fileFolder = WWW_ROOT."img".DS."profiles".DS.$this->user['id'].DS;
+                    $filePath = $fileFolder.'profile.jpg';
+
+
+                    if(!is_dir($fileFolder)){
+                        mkdir($fileFolder,0777,true);
+                    }
+                    move_uploaded_file($file['tmp_name'],$filePath);
+
+                    $usr->preferences = implode(',',$usr->preferences);
+                    $usr->img_profile = 'profiles/'.$this->user['id'].'/'.'profile.jpg';
+                    $this->Users->save($usr);
+                    $this->Auth->setUser($usr);
+
+                    $this->Flash->success(__('Imagem de perfil atualizada com sucesso!'));
+                    $this->redirect(['_name'=>'user.profile']);
+
+                }else{
+                    $this->Flash->error(__('O arquivo deve ter no máximo 5MB'));
+                }
+            }else{
+                $this->Flash->error(__('A imagem deve ser jpg ou jpeg'));
             }
-            $this->Flash->error(__('The user could not be saved. Please, try again.'));
-        }
-        $this->set(compact('user'));
-        $this->set('_serialize', ['user']);
-    }
-
-    /**
-     * Delete method
-     *
-     * @param string|null $id User id.
-     * @return \Cake\Http\Response|null Redirects to index.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function delete($id = null)
-    {
-        $this->request->allowMethod(['post', 'delete']);
-        $user = $this->Users->get($id);
-        if ($this->Users->delete($user)) {
-            $this->Flash->success(__('The user has been deleted.'));
-        } else {
-            $this->Flash->error(__('The user could not be deleted. Please, try again.'));
         }
 
-        return $this->redirect(['action' => 'index']);
+        $this->set('user',$usr);
+        $this->set('invites',$this->invites);
+        $this->set('eventNotifications',$this->eventNotifications);
+        $this->set('sortNotifications',$this->sortNotifications);
+        $this->set('messageNotifications',$this->messageNotifications);
     }
 }

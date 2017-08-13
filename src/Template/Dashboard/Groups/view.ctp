@@ -95,7 +95,7 @@
                 <div class="col-md-2 col-sm-4 col-xs-12">
                     <div class="box box-info">
                         <div class="box-body box-profile">
-                            <?= $this->Html->image('profile_default.png',['alt'=>$userG['name'],'class'=>'profile-user-img img-responsive img-circle']) ?>
+                            <?= $this->Html->image($userG['img_profile'],['alt'=>$userG['name'],'class'=>'profile-user-img img-responsive img-circle']) ?>
                             <h3 class="profile-username text-center"><?= h($userG['name']) ?></h3>
                             <?php if($userG->_matchingData['UsersGroup']->role == 2): ?>
                                 <p class="text-muted text-center">Criador</p>
@@ -123,7 +123,7 @@
                         <?php foreach ($messages as $message): ?>
                             <div class="box-comment">
                                 <!-- User image -->
-                                <?= $this->Html->image('profile_default.png',['alt'=>'Usuario','class'=>'img-circle img-md']) ?>
+                                <?= $this->Html->image($message->user->img_profile,['alt'=>'Usuario','class'=>'img-circle img-md']) ?>
                                 <div class="comment-text">
                           <span class="username">
                             <?= $message->user->name?> - <small class="text-muted"><?= $this->Time->format($message->datetime,'dd/MM/YYYY - H:mm',null)?></small>
@@ -146,7 +146,7 @@
                         <?= $this->Form->create(null,['url'=>$this->Url->build(['_name'=>'groups.sendMessage','id'=>$group['id']])]) ?>
                         <div class="col-md-2 col-sm-6 col-xs-12">
                             <div class="">
-                                <?= $this->Html->image('profile_default.png',['alt'=>$user['name'],'class'=>'profile-user-img img-responsive img-circle']) ?>
+                                <?= $this->Html->image($user['img_profile'],['alt'=>$user['name'],'class'=>'profile-user-img img-responsive img-circle']) ?>
                                 <h3 class="profile-username text-center"><?= h($user['name']) ?></h3>
                             </div>
                         </div>

@@ -200,7 +200,7 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
                         <ul class="dropdown-menu">
                             <!-- User image -->
                             <li class="user-header">
-                                <?= $this->Html->image('profile_default.png',['alt'=>'profile','class'=>'img-circle']) ?>
+                                <?= $this->Html->image($user['img_profile'],['alt'=>'profile','class'=>'img-circle']) ?>
 
                                 <p>
                                     <?= h($user['name'])?>
@@ -210,7 +210,7 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
                             <!-- Menu Footer-->
                             <li class="user-footer">
                                 <div class="pull-left">
-                                    <a href="#" class="btn btn-default btn-flat">Perfil</a>
+                                    <a href="<?= $this->Url->build(['_name'=>'user.profile']) ?>" class="btn btn-default btn-flat">Perfil</a>
                                 </div>
                                 <div class="pull-right">
                                     <a href="<?= $this->Url->build(['_name'=>'do.logout']) ?>" class="btn btn-default btn-flat">Sair</a>
@@ -230,7 +230,7 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
             <!-- Sidebar user panel -->
             <div class="user-panel">
                 <div class="pull-left image">
-                    <?= $this->Html->image('profile_default.png',['alt'=>'profile','class'=>'img-circle']) ?>
+                    <?= $this->Html->image($user['img_profile'],['alt'=>'profile','class'=>'img-circle']) ?>
                 </div>
                 <div class="pull-left info">
                     <p><?= h($user['name'])?></p>
@@ -264,7 +264,7 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
                         <li><a href="<?= $this->Url->build(['_name'=>'groups.add.form']) ?>"><i class="fa fa-plus-circle"></i> Criar novo</a></li>
                     </ul>
                 </li>
-                <li><a href="https://adminlte.io/docs"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
+                <li><a href="https://adminlte.io/docs"><i class="fa fa-book"></i> </a></li>
                 <li class="header">LABELS</li>
                 <li><a href="#"><i class="fa fa-circle-o text-red"></i> <span>Important</span></a></li>
                 <li><a href="#"><i class="fa fa-circle-o text-yellow"></i> <span>Warning</span></a></li>

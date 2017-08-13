@@ -64,8 +64,10 @@ Router::scope('/', function (RouteBuilder $routes) {
     $routes->connect('/register',['controller'=>'Register','action'=>'index'],['_name'=>'register.index']);
     $routes->connect('/register/new',['controller'=>'Users','action'=>'add'],['_name'=>'register.create','_method'=>'post']);
     $routes->connect('/dashboard',['controller'=>'Users','action'=>'dashboard']);
+    $routes->connect('/dashboard/profile',['controller'=>'Users','action'=>'profile'],['_name'=>'user.profile']);
 
     $routes->prefix('dashboard',function($routes){
+
 
         $routes->connect('/invites/',['controller'=>'Groups','action'=>'invites'],['_name'=>'groups.invites']);
         $routes->connect('/invites/group/:gid',['controller'=>'Groups','action'=>'handleInvites'],['_name'=>'groups.handleInvites']);

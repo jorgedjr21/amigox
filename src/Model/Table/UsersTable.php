@@ -78,6 +78,7 @@ class UsersTable extends Table
         $validator
             ->allowEmpty('img_profile');
 
+
         return $validator;
     }
 
