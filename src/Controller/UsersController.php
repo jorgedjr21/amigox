@@ -51,7 +51,7 @@ class UsersController extends AppController
         $this->eventNotifications = $this->Notifications->getEventsNotificationsFromUser($this->user['id']);
         $this->sortNotifications = $this->Notifications->getSortNotificationsFromUser($this->user['id']);
         $this->messageNotifications = $this->Notifications->getMessageNotificationsFromUser($this->user['id']);
-        $this->user['img_profile'] = (is_null($this->user['img_profile'])) ? 'profile_default.png' : 'profiles/'.$this->user['id'].'/'.$this->user['img_profile'];
+        //$this->user['img_profile'] = (is_null($this->user['img_profile'])) ? 'profile_default.png' : 'profiles/'.$this->user['id'].'/'.$this->user['img_profile'];
 
         $myGroyps = $query->find('all')->where(['id'=>$this->user['id']])->matching('UsersGroup',function($q){
             return $q->where(['UsersGroup.user_id'=>$this->user['id'],'UsersGroup.invite_status'=>1]);
