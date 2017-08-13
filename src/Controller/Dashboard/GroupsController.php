@@ -179,7 +179,7 @@ class GroupsController extends AppController
         }
 
         $conn = ConnectionManager::get('default');
-        $stmt = $conn->query("SELECT * From Users u Where u.id NOT IN (Select ug.user_id FROM users_group ug WHERE ug.group_id = '$id')");
+        $stmt = $conn->query("SELECT * From users u Where u.id NOT IN (Select ug.user_id FROM users_group ug WHERE ug.group_id = '$id')");
         $usersNotInGroup = $stmt->fetchAll('assoc');
 
         $this->set('user',$this->user);

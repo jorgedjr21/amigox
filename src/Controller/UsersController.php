@@ -148,7 +148,7 @@ class UsersController extends AppController
                     if(file_exists($filePath)){
                         unlink($filePath);
                     }
-                    
+
                     move_uploaded_file($file['tmp_name'],$filePath);
 
                     $usr->preferences = implode(',',$usr->preferences);
