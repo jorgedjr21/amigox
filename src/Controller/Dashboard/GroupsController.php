@@ -19,8 +19,11 @@ class GroupsController extends AppController
     private $invites;
     private $eventNotifications;
     private $sortNotifications;
+    private $messageNotifications;
     public $paginate = [
-        'limit' => 12,
+        'limit'     => 12,
+        //'UsersGroup' => ['scope'=>'users'],
+        //'Messages'  => ['scope'=>'messages']
     ];
     public function initialize()
     {
@@ -33,6 +36,7 @@ class GroupsController extends AppController
         $this->invites = $this->Invites->getUserGroupsInvites($this->user['id']);
         $this->eventNotifications = $this->Notifications->getEventsNotificationsFromUser($this->user['id']);
         $this->sortNotifications = $this->Notifications->getSortNotificationsFromUser($this->user['id']);
+        $this->messageNotifications = $this->Notifications->getMessageNotificationsFromUser($this->user['id']);
 
     }
 
@@ -57,6 +61,7 @@ class GroupsController extends AppController
         $this->set('invites',$this->invites);
         $this->set('eventNotifications',$this->eventNotifications);
         $this->set('sortNotifications',$this->sortNotifications);
+        $this->set('messageNotifications',$this->messageNotifications);
         $this->set('_serialize', ['groups']);
     }
 
@@ -71,32 +76,55 @@ class GroupsController extends AppController
     {
         $id = $this->request->getParam('id');
         $userTable = TableRegistry::get('Users');
-        $group = $this->Groups->get($id, [
-            'contain' => ['GroupEvents','UsersGroup'],
-        ]);
-        $myFriend = null;
-
-        $groupEvents = $this->Groups->GroupEvents->find()->where(['group_id'=>$id])->matching('Event',function($q){
-            return $q->where(['datetime >'=>Time::now('America/Sao_Paulo')]);
-        })->order(['datetime'=>'ASC'])->limit(3);
+        $messageNotificationsTable = TableRegistry::get('MessagesNotifications');
 
 
-        $usersFromGroup = $userTable->find('all')->matching('UsersGroup',function($q) use ($id) {
-            return $q->where(['group_id'=>$id,'invite_status'=>1]);
-        });
-        $creator = $this->Groups->UsersGroup->find()->where(['group_id'=>$id,'role'=>2])->first();
-        $this->paginate($usersFromGroup);
+        $groupCheck = $this->Groups->UsersGroup->find()->where(['user_id'=>$this->user['id'],'group_id'=>$id,'invite_status'=>1])->first();
+
+        if(is_null($groupCheck)){
+            $this->set('canSee',false);
+        }else{
+            $messages = $this->Groups->Messages->find()->where(['group_id'=>$id])->orderDesc('datetime')->contain(['Users']);
+            $group = $this->Groups->get($id);
+
+            $groupEvents = $this->Groups->GroupEvents->find()->where(['group_id'=>$id])->matching('Event',function($q){
+                return $q->where(['datetime >'=>Time::now('America/Sao_Paulo')]);
+            })->order(['datetime'=>'ASC'])->limit(3);
 
 
-        $this->set('usersFromGroup',$usersFromGroup);
+            $usersFromGroup = $userTable->find('all')->matching('UsersGroup',function($q) use ($id) {
+                return $q->where(['group_id'=>$id,'invite_status'=>1]);
+            });
+            $creator = $this->Groups->UsersGroup->find()->where(['group_id'=>$id,'role'=>2])->first();
+
+            $messages = $this->paginate($messages);
+
+            /** atualiza notificação para vista (status 1) */
+            $notifications = $messageNotificationsTable->find()
+                ->where(['user_id'=>$this->user['id'],'group_id'=>$id,'status'=>0]);
+
+            if(!is_null($notifications)){
+                foreach($notifications as $notification){
+                    $notification->status = 1;
+                    $messageNotificationsTable->save($notification);
+                }
+            }
+
+            $this->set(compact('usersFromGroup','messages'));
+            $this->set('group', $group);
+            $this->set('groupEvents',$groupEvents);
+            $this->set('creator',$creator);
+            $this->set('canSee',true);
+            $this->set('_serialize', ['group']);
+        }
+
+        $this->set('user',$this->user);
         $this->set('invites',$this->invites);
         $this->set('eventNotifications',$this->eventNotifications);
         $this->set('sortNotifications',$this->sortNotifications);
-       $this->set('group', $group);
-       $this->set('groupEvents',$groupEvents);
-       $this->set('creator',$creator);
-       $this->set('user',$this->user);
-       $this->set('_serialize', ['group']);
+        $this->set('messageNotifications',$this->messageNotifications);
+
+
     }
 
     /**
@@ -127,55 +155,8 @@ class GroupsController extends AppController
         $this->set('invites',$this->invites);
         $this->set('eventNotifications',$this->eventNotifications);
         $this->set('sortNotifications',$this->sortNotifications);
+        $this->set('messageNotifications',$this->messageNotifications);
         $this->set('_serialize', ['group']);
-    }
-
-    /**
-     * Edit method
-     *
-     * @param string|null $id Group id.
-     * @return \Cake\Http\Response|null Redirects on successful edit, renders view otherwise.
-     * @throws \Cake\Network\Exception\NotFoundException When record not found.
-     */
-    public function edit($id = null)
-    {
-        $group = $this->Groups->get($id, [
-            'contain' => []
-        ]);
-        if ($this->request->is(['patch', 'post', 'put'])) {
-            $group = $this->Groups->patchEntity($group, $this->request->getData());
-            if ($this->Groups->save($group)) {
-                $this->Flash->success(__('The group has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
-            }
-            $this->Flash->error(__('The group could not be saved. Please, try again.'));
-        }
-        $this->set(compact('group'));
-        $this->set('invites',$this->invites);
-        $this->set('eventNotifications',$this->eventNotifications);
-        $this->set('sortNotifications',$this->sortNotifications);
-        $this->set('_serialize', ['group']);
-    }
-
-    /**
-     * Delete method
-     *
-     * @param string|null $id Group id.
-     * @return \Cake\Http\Response|null Redirects to index.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function delete($id = null)
-    {
-        $this->request->allowMethod(['post', 'delete']);
-        $group = $this->Groups->get($id);
-        if ($this->Groups->delete($group)) {
-            $this->Flash->success(__('The group has been deleted.'));
-        } else {
-            $this->Flash->error(__('The group could not be deleted. Please, try again.'));
-        }
-
-        return $this->redirect(['action' => 'index']);
     }
 
     /**
@@ -206,7 +187,55 @@ class GroupsController extends AppController
         $this->set('group',$group);
         $this->set('eventNotifications',$this->eventNotifications);
         $this->set('sortNotifications',$this->sortNotifications);
+        $this->set('messageNotifications',$this->messageNotifications);
         $this->set('usersNotInGroup',$usersNotInGroup);
+    }
+
+
+    /**
+     * send message to group
+     * @param null $id
+     * @return \Cake\Http\Response|null
+     */
+    public function sendMessage($id = null){
+        $id = $this->request->getParam('id');
+
+        if($this->request->is('post')){
+            $userTable = TableRegistry::get('Users');
+            $messageTable = TableRegistry::get('Messages');
+            $data = $this->request->getData();
+            $usersFromGroup = $userTable->find('all')->matching('UsersGroup',function($q) use ($id) {
+                return $q->where(['group_id'=>$id,'invite_status'=>1]);
+            });
+
+            $data['user_id'] = $this->user['id'];
+            $data['group_id'] = $id;
+            $data['datetime'] = Time::now('America/Sao_Paulo');
+
+            $message = $messageTable->newEntity($data);
+            if($messageTable->save($message)){
+                $notif = [];
+                /* Cria array de notificações para todos os usuários*/
+                foreach ($usersFromGroup as $ug){
+                    //If que verifica condição para nao enviar notificação para si mesmo
+                    if($message->user_id != $ug['id']){
+                        $notif[] = ['message_id'=>$message->id,'user_id'=>$ug['id'],'group_id'=>$id, 'status'=>0];
+                    }
+                }
+
+                /* Cria entidades das notificações e salva*/
+                $this->Notifications->saveMessagesNotifications($notif);
+
+                return $this->redirect(['_name' => 'groups.view','id'=>$id]);
+            }else{
+
+                $this->Flash->error(__('Não foi possivel enviar a mensagem pois erros ocorreram:'),['params'=>['errors'=>$message->getErrors()]]);
+                return $this->redirect(['_name' => 'groups.view','id'=>$id]);
+            }
+        }
+
+        return $this->redirect(['_name'=>'groups.view','id'=>$id]);
+
     }
 
     /*
@@ -350,6 +379,7 @@ class GroupsController extends AppController
         $this->set('user',$this->user);
         $this->set('invites',$this->invites);
         $this->set('eventNotifications',$this->eventNotifications);
+        $this->set('messageNotifications',$this->messageNotifications);
         $this->set('sortNotifications',$this->sortNotifications);
 
     }
@@ -412,6 +442,6 @@ class GroupsController extends AppController
         $this->set('invites',$this->invites);
         $this->set('eventNotifications',$this->eventNotifications);
         $this->set('sortNotifications',$this->sortNotifications);
-
+        $this->set('messageNotifications',$this->messageNotifications);
     }
 }

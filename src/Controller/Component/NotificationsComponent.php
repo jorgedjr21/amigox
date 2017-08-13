@@ -47,4 +47,26 @@ class NotificationsComponent extends Component
 
         return $notifications;
     }
+
+    public function saveMessagesNotifications($data){
+
+        $messagesNotificationTable = TableRegistry::get('MessagesNotifications');
+        $messagesNotif = $messagesNotificationTable->newEntities($data);
+        $messagesNotificationTable->saveMany($messagesNotif);
+
+        return true;
+    }
+
+    public function getMessageNotificationsFromUser($uid){
+        $messageNotifications = TableRegistry::get('MessagesNotifications');
+
+        $notifications = $messageNotifications
+            ->find()
+            ->where(['MessagesNotifications.user_id'=>$uid,'MessagesNotifications.status'=>0])
+            ->contain(['Messages','Groups','Users'])
+            ->orderAsc('datetime')
+            ->limit(10);
+
+        return $notifications;
+    }
 }

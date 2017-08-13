@@ -1,22 +1,22 @@
 <?php
 namespace App\Test\TestCase\Model\Table;
 
-use App\Model\Table\GroupsTable;
+use App\Model\Table\MessagesTable;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
 
 /**
- * App\Model\Table\GroupsTable Test Case
+ * App\Model\Table\MessagesTable Test Case
  */
-class GroupsTableTest extends TestCase
+class MessagesTableTest extends TestCase
 {
 
     /**
      * Test subject
      *
-     * @var \App\Model\Table\GroupsTable
+     * @var \App\Model\Table\MessagesTable
      */
-    public $Groups;
+    public $Messages;
 
     /**
      * Fixtures
@@ -24,12 +24,13 @@ class GroupsTableTest extends TestCase
      * @var array
      */
     public $fixtures = [
+        'app.messages',
+        'app.users',
+        'app.users_group',
         'app.groups',
         'app.group_events',
         'app.event',
         'app.events_notifications',
-        'app.users',
-        'app.users_group',
         'app.lottery'
     ];
 
@@ -41,8 +42,8 @@ class GroupsTableTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $config = TableRegistry::exists('Groups') ? [] : ['className' => GroupsTable::class];
-        $this->Groups = TableRegistry::get('Groups', $config);
+        $config = TableRegistry::exists('Messages') ? [] : ['className' => MessagesTable::class];
+        $this->Messages = TableRegistry::get('Messages', $config);
     }
 
     /**
@@ -52,7 +53,7 @@ class GroupsTableTest extends TestCase
      */
     public function tearDown()
     {
-        unset($this->Groups);
+        unset($this->Messages);
 
         parent::tearDown();
     }
@@ -73,6 +74,16 @@ class GroupsTableTest extends TestCase
      * @return void
      */
     public function testValidationDefault()
+    {
+        $this->markTestIncomplete('Not implemented yet.');
+    }
+
+    /**
+     * Test buildRules method
+     *
+     * @return void
+     */
+    public function testBuildRules()
     {
         $this->markTestIncomplete('Not implemented yet.');
     }

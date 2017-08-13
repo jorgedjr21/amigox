@@ -73,7 +73,7 @@ Router::scope('/', function (RouteBuilder $routes) {
 
         $routes->connect('/groups/:id',['controller'=>'Groups','action'=>'view'],['_name'=>'groups.view']);
 
-
+        $routes->connect('/groups/:id/sendMessage',['controller'=>'Groups','action'=>'sendMessage'],['_name'=>'groups.sendMessage','_method'=>'post']);
 
         $routes->connect('/groups/:id/event/:eid/sort',['controller'=>'Groups','action'=>'sort'],['_name'=>'groups.sort']);
 

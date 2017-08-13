@@ -54,77 +54,42 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
                     <li class="dropdown messages-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-envelope-o"></i>
-                            <span class="label label-success">4</span>
+                            <?php if($messageNotifications->count() > 0): ?>
+                            <span class="label label-success"><?= $messageNotifications->count() ?></span>
+                            <?php endif; ?>
                         </a>
                         <ul class="dropdown-menu">
-                            <li class="header">You have 4 messages</li>
+                            <li class="header">Você tem novas mensagens nos grupos </li>
                             <li>
                                 <!-- inner menu: contains the actual data -->
                                 <ul class="menu">
-                                    <li><!-- start message -->
-                                        <a href="#">
-                                            <div class="pull-left">
-                                                <?= $this->Html->image('profile_default.png',['alt'=>'profile','class'=>'img-circle']) ?>
-                                            </div>
-                                            <h4>
-                                                Support Team
-                                                <small><i class="fa fa-clock-o"></i> 5 mins</small>
-                                            </h4>
-                                            <p>Why not buy a new awesome theme?</p>
-                                        </a>
-                                    </li>
-                                    <!-- end message -->
                                     <li>
-                                        <a href="#">
-                                            <div class="pull-left">
-                                                <?= $this->Html->image('profile_default.png',['alt'=>'profile','class'=>'img-circle']) ?>
-                                            </div>
-                                            <h4>
-                                                AdminLTE Design Team
-                                                <small><i class="fa fa-clock-o"></i> 2 hours</small>
-                                            </h4>
-                                            <p>Why not buy a new awesome theme?</p>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <div class="pull-left">
-                                                <?= $this->Html->image('profile_default.png',['alt'=>'profile','class'=>'img-circle']) ?>
-                                            </div>
-                                            <h4>
-                                                Developers
-                                                <small><i class="fa fa-clock-o"></i> Today</small>
-                                            </h4>
-                                            <p>Why not buy a new awesome theme?</p>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <div class="pull-left">
-                                                <?= $this->Html->image('profile_default.png',['alt'=>'profile','class'=>'img-circle']) ?>
-                                            </div>
-                                            <h4>
-                                                Sales Department
-                                                <small><i class="fa fa-clock-o"></i> Yesterday</small>
-                                            </h4>
-                                            <p>Why not buy a new awesome theme?</p>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <div class="pull-left">
-                                                <?= $this->Html->image('profile_default.png',['alt'=>'profile','class'=>'img-circle']) ?>
-                                            </div>
-                                            <h4>
-                                                Reviewers
-                                                <small><i class="fa fa-clock-o"></i> 2 days</small>
-                                            </h4>
-                                            <p>Why not buy a new awesome theme?</p>
-                                        </a>
+                                        <!-- inner menu: contains the actual data -->
+                                        <?php if($messageNotifications->count() > 0 ): ?>
+                                            <ul class="menu">
+                                                <?php foreach($messageNotifications as $messageNotification): ?>
+                                                    <li><!-- start message -->
+                                                        <a href="<?=$this->Url->build(['_name'=>'groups.view','id'=>$messageNotification->group_id])?>">
+                                                            <div class="pull-left">
+                                                                <i class="fa fa-envelope fa-2x"></i>
+                                                            </div>
+                                                            <h4>
+                                                                <?= $messageNotification->group->name?>
+                                                                <small> <?= $this->Time->format($messageNotification->message->datetime,'dd/MM/YYYY - H:mm',null)?></small>
+                                                            </h4>
+                                                            <p>Enviada por <?= $messageNotification->user->name ?></p>
+                                                        </a>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        <?php else: ?>
+                                            <ul class="menu">
+                                                <li><a href="#" class="text-red"><i class="fa fa-times"></i> Você já viu todas</a></li>
+                                            </ul>
+                                        <?php endif; ?>
                                     </li>
                                 </ul>
                             </li>
-                            <li class="footer"><a href="#">See All Messages</a></li>
                         </ul>
                     </li>
                     <!-- Notifications: style can be found in dropdown.less -->
@@ -149,7 +114,7 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
                                     </ul>
                                 <?php else: ?>
                                     <ul class="menu">
-                                        <li><a href="#" class="text-red"><i class="fa fa-times"></i> Nenhum Convite</a></li>
+                                        <li><a href="#" class="text-red"><i class="fa fa-times"></i> Você já viu todos</a></li>
                                     </ul>
                                 <?php endif; ?>
                             </li>
@@ -183,7 +148,7 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
                                         </ul>
                                     <?php else: ?>
                                         <ul class="menu">
-                                            <li><a href="#" class="text-red"><i class="fa fa-times"></i> Nenhum Evento</a></li>
+                                            <li><a href="#" class="text-red"><i class="fa fa-times"></i> Você já viu todos</a></li>
                                         </ul>
                                     <?php endif; ?>
                                     <!-- end task item -->
@@ -217,7 +182,7 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
                                             </ul>
                                         <?php else: ?>
                                             <ul class="menu">
-                                                <li><a href="#" class="text-red"><i class="fa fa-times"></i> Nenhum Evento</a></li>
+                                                <li><a href="#" class="text-red"><i class="fa fa-times"></i> Você já viu todos</a></li>
                                             </ul>
                                         <?php endif; ?>
                                     </ul>
@@ -295,7 +260,7 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
                         </span>
                     </a>
                     <ul class="treeview-menu">
-                        <li><a href="<?= $this->Url->build(['_name'=>'groups.index'])?>"><i class="fa fa-list"></i> Ver meus Grupos</a></li>
+                        <li><a href="<?= $this->Url->build(['_name'=>'groups.index'])?>"><i class="fa fa-list"></i> Que Participo</a></li>
                         <li><a href="<?= $this->Url->build(['_name'=>'groups.add.form']) ?>"><i class="fa fa-plus-circle"></i> Criar novo</a></li>
                     </ul>
                 </li>

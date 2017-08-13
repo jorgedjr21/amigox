@@ -11,6 +11,7 @@ use Cake\Validation\Validator;
  *
  * @property \App\Model\Table\GroupEventsTable|\Cake\ORM\Association\HasMany $GroupEvents
  * @property \App\Model\Table\LotteryTable|\Cake\ORM\Association\HasMany $Lottery
+ * @property |\Cake\ORM\Association\HasMany $Messages
  * @property \App\Model\Table\UsersGroupTable|\Cake\ORM\Association\HasMany $UsersGroup
  *
  * @method \App\Model\Entity\Group get($primaryKey, $options = [])
@@ -44,6 +45,9 @@ class GroupsTable extends Table
         $this->hasMany('Lottery', [
             'foreignKey' => 'group_id'
         ]);
+        $this->hasMany('Messages', [
+            'foreignKey' => 'group_id'
+        ]);
         $this->hasMany('UsersGroup', [
             'foreignKey' => 'group_id'
         ]);
@@ -59,17 +63,14 @@ class GroupsTable extends Table
     {
         $validator
             ->notEmpty('id', 'create','O Id não pode estar vazio');
-
         $validator
             ->requirePresence('name', 'create')
             ->lengthBetween('name',[6,50],'O Nome deve conter de 6 a 50 carateres')
             ->notEmpty('name','O Nome não pode estar vazio');
-
         $validator
             ->requirePresence('description', 'create')
             ->maxLength('description',255,'A descrição deve ter ao máximo 255 caracteres')
             ->notEmpty('description','A descrição não pode ser vazia');
-
         $validator
             ->allowEmpty('max_value');
 

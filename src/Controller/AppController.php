@@ -52,7 +52,7 @@ class AppController extends Controller
         $this->loadComponent('Csrf');
         $this->loadComponent('Auth',[
             'loginAction' => [
-                'controller' => 'Login',
+                'controller' => '/Login',
                 'action' => 'index'
             ],
             'loginRedirect'=>[

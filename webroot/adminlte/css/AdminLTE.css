@@ -1871,7 +1871,7 @@ a:focus {
   float: left;
 }
 .box-comments .comment-text {
-  margin-left: 40px;
+  margin-left: 50px;
   color: #555;
 }
 .box-comments .username {
@@ -4812,8 +4812,8 @@ table.text-center th {
 .img-sm,
 .box-comments .box-comment img,
 .user-block.user-block-sm img {
-  width: 30px !important;
-  height: 30px !important;
+  width: 40px !important;
+  height: 40px !important;
 }
 .img-sm + .img-push {
   margin-left: 40px;

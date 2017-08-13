@@ -18,6 +18,7 @@ class UsersController extends AppController
     private $invites;
     private $eventNotifications;
     private $sortNotifications;
+    private $messageNotifications;
 
     public function initialize()
     {
@@ -49,6 +50,7 @@ class UsersController extends AppController
         $this->invites = $this->Invites->getUserGroupsInvites($this->user['id']);
         $this->eventNotifications = $this->Notifications->getEventsNotificationsFromUser($this->user['id']);
         $this->sortNotifications = $this->Notifications->getSortNotificationsFromUser($this->user['id']);
+        $this->messageNotifications = $this->Notifications->getMessageNotificationsFromUser($this->user['id']);
 
         $myGroyps = $query->find('all')->where(['id'=>$this->user['id']])->matching('UsersGroup',function($q){
             return $q->where(['UsersGroup.user_id'=>$this->user['id'],'UsersGroup.invite_status'=>1]);
@@ -57,6 +59,7 @@ class UsersController extends AppController
         $this->set('invites',$this->invites);
         $this->set('eventNotifications',$this->eventNotifications);
         $this->set('sortNotifications',$this->sortNotifications);
+        $this->set('messageNotifications',$this->messageNotifications);
         $this->set('user',$this->Auth->user());
         $this->set('myGroups',$myGroyps);
     }
@@ -76,28 +79,6 @@ class UsersController extends AppController
         $this->set('user', $user);
         $this->set('_serialize', ['user']);
     }
-
-    /**
-     * Add method
-     *
-     * @return \Cake\Http\Response|null Redirects on successful add, renders view otherwise.
-     */
-    /*public function add()
-    {
-
-        $user = $this->Users->newEntity();
-        if ($this->request->is('post')) {
-            $user = $this->Users->patchEntity($user, $this->request->getData());
-            if ($this->Users->save($user)) {
-                $this->Flash->success(__('The user has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
-            }
-            $this->Flash->error(__('The user could not be saved. Please, try again.'));
-        }
-        $this->set(compact('user'));
-        $this->set('_serialize', ['user']);
-    }*/
 
     public function add()
     {
