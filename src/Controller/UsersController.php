@@ -99,6 +99,7 @@ class UsersController extends AppController
                 $data['preferences'] = '';
             }
 
+            $data['img_profile'] = 'profile_default.png';
             $user = $this->Users->newEntity($data);
             if($user->getErrors()){
                 //$errorMessages = [];
